@@ -1,6 +1,11 @@
 package Modelos;
 
-public class ModeloCliente {
+import java.io.Serializable;
+
+public class ModeloCliente implements Serializable {
+
+    // Numero para vertificar la versión de la clase serializable.
+    private static final long serialVersionUID = 1L;
 
     // Atributos del Cliente
     private String nombre;
