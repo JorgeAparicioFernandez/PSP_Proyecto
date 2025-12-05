@@ -20,10 +20,13 @@ public class Cliente {
 
     public static void main(String[] args) {
 
+        // Variables de Conexión.
         final String HOST = "localhost";
         final int PUERTO = 55555;
 
+        // Variables de lógica.
         ModeloCliente cliente;
+        byte[] clienteCifrado;
         Map<String, Object> envio;
 
         // Variables de Cliente.
@@ -42,15 +45,18 @@ public class Cliente {
                 Socket socket = new Socket(HOST, PUERTO);
                 ObjectOutputStream salida = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
-                Scanner sc = new Scanner(System.in);
+                Scanner sc = new Scanner(System.in)
 
         ) {
 
+            // Recibimos la clave pública desde el servidor.
             PublicKey clavePublica = (PublicKey) entrada.readObject();
 
+            // Variable para el manejo del Switch.
             int opcion;
 
             do {
+                // Texto con las opciones del programa.
                 System.out.println("Bienvenido al sistema de Compra-Venta de entradas:\n"
                         + "1. Registrarse\n"
                         + "2. Iniciar Sesión\n"
@@ -59,6 +65,7 @@ public class Cliente {
                         + "5. Salir\n");
 
                 try {
+                    // Leemos la orden del cliente.
                     System.out.println("¿Que operación desea realizar? (1,2,3,4,5)");
                     opcion = sc.nextInt();
                     sc.nextLine();
@@ -68,8 +75,7 @@ public class Cliente {
 
                             do {
 
-                                cliente = new ModeloCliente();
-
+                                // Leemos todos los datos del cliente y los mandamos a verificar.
                                 System.out.println("Introduzca su Nombre:");
                                 nombre = sc.nextLine();
 
@@ -95,20 +101,21 @@ public class Cliente {
 
                                 cliente = new ModeloCliente(nombre,apellido, edad, email, usuario, contra);
 
-                                byte[] clienteCifrado = cifrar(cliente, clavePublica);
-
-                                // Construimos el paquete para el envio
-                                envio = new HashMap<>();
-                                envio.put("accion", 1);
-                                envio.put("cliente", clienteCifrado);
-
-                                // Enviamos el paquete.
-                                salida.writeObject(envio);
-
-                                // Mostramos la devolucion de la accion recibida desde el servidor.
-                                System.out.println((String) entrada.readObject());
-
                             }while(!validacionRegistro(cliente));
+
+                            // Ciframos el cliente una vez validados los datos.
+                            clienteCifrado = cifrar(cliente, clavePublica);
+
+                            // Construimos el paquete para el envío.
+                            envio = new HashMap<>();
+                            envio.put("accion", 1);
+                            envio.put("cliente", clienteCifrado);
+
+                            // Enviamos el paquete.
+                            salida.writeObject(envio);
+
+                            // Mostramos la devolución de la acción recibida desde el servidor.
+                            System.out.println((String) entrada.readObject());
 
                             break;
                         case 2:
@@ -128,9 +135,9 @@ public class Cliente {
                             cliente.setUsuario(usuario);
                             cliente.setContra(contra);
 
-                            byte[] clienteCifrado = cifrar(cliente, clavePublica);
+                            clienteCifrado = cifrar(cliente, clavePublica);
 
-                            // Construimos el paquete para el envio.
+                            // Construimos el paquete para el envío.
                             envio = new HashMap<>();
                             envio.put("accion", 2);
                             envio.put("cliente", clienteCifrado);
@@ -138,20 +145,20 @@ public class Cliente {
                             // Enviamos el paquete.
                             salida.writeObject(envio);
 
-                            // Mostramos la devolucion de la accion recibida desde el servidor.
+                            // Mostramos la devolución de la acción recibida desde el servidor.
                             System.out.println((String) entrada.readObject());
 
                             break;
                         case 3:
 
-                            // Construimos el paquete para el envio.
+                            // Construimos el paquete para el envío.
                             envio = new HashMap<>();
                             envio.put("accion", 3);
 
                             // Enviamos el paquete.
                             salida.writeObject(envio);
 
-                            // Mostramos la devolucion de la accion recibida desde el servidor.
+                            // Mostramos la devolución de la acción recibida desde el servidor.
                             System.out.println((String) entrada.readObject());
 
                             break;
@@ -162,7 +169,7 @@ public class Cliente {
                             identificador = sc.nextInt();
                             sc.nextLine();
 
-                            // Construimos el paquete para el envio.
+                            // Construimos el paquete para el envío.
                             envio = new HashMap<>();
                             envio.put("accion", 4);
                             envio.put("identificador", identificador);
@@ -170,45 +177,48 @@ public class Cliente {
                             // Enviamos el paquete.
                             salida.writeObject(envio);
 
+                            // Recibimos el paquete del servidor con la respuesta a la compra.
                             Map<String, Object> recibido = (Map<String, Object>) entrada.readObject();
 
+                            // Variable para saber si la compra ha sido completada o rechazada.
                             String comprado = (String) recibido.get("estado");
 
                             switch (comprado) {
 
                                 case "Completa":
 
+                                    // Variables para almacenar el código de compra y la firma
                                     String codCompra = (String) recibido.get("codCompra");
-
                                     byte[] firma = (byte[]) recibido.get("firma");
 
                                     // Generamos el objeto con el que vamos a verificar la firma
                                     Signature verificarRSA = Signature.getInstance("SHA256withRSA");
 
-                                    // Inicializamos el objeto con la clave publica para comprobar la firma
+                                    // Inicializamos el objeto con la clave pública para comprobar la firma
                                     verificarRSA.initVerify(clavePublica);
 
-                                    // Añadimos al objeto el contenido del mesnaje que hemos recibido
+                                    // Añadimos al objeto el contenido del mensaje que hemos recibido
                                     verificarRSA.update(codCompra.getBytes());
 
-                                    // Comprobamos la firma recibida con el objeto que hemos creado y mostramos el resultado
+                                    // Comprobamos el código de compra con la firma recibida, para demostrar que no ha
+                                    // habido cambios durante el envio del paquete.
                                     if (verificarRSA.verify(firma)){
                                         // La firma ha sido validada
                                         System.out.println("La Firma de la compra de su entrada " +
-                                                "ha sido verificada con exito. CodCompra: " + codCompra);
+                                                "ha sido verificada con exito. CodCompra: " + codCompra + "\n");
                                     }else{
-                                        // La firma ha sido validada
+                                        // La firma no ha sido validada
                                         System.out.println("La Firma de la compra de su entrada " +
                                                 "no ha pasado la verificación pertinente, " +
-                                                "Porfavor contacte con ayuda al cliente. CodCompra: " + codCompra);
+                                                "Porfavor contacte con ayuda al cliente. CodCompra: " + codCompra + "\n");
                                     }
 
                                     break;
 
                                 case "Incompleta":
 
+                                    // Mostramos el mensaje con el motivo por el que la compra no se haya realizado.
                                     String msg = (String) recibido.get("msg");
-
                                     System.out.println(msg);
 
                                     break;
@@ -217,7 +227,7 @@ public class Cliente {
                             break;
                         case 5:
 
-                            // Construimos el paquete para el envio
+                            // Construimos el paquete para el envío.
                             envio = new HashMap<>();
                             envio.put("accion", 5);
 
@@ -229,11 +239,15 @@ public class Cliente {
 
                             break;
                         default:
-                            System.out.println("Opción no válida, por favor introduzca un número del 1 al 4.\n");
+
+                            // Mostramos un mensaje para los casos en los que no recibamos un número entre el 1 y el 5.
+                            System.out.println("Opción no válida, por favor introduzca un número del 1 al 5.\n");
                             break;
                     }
 
                 } catch (InputMismatchException e) {
+
+                    // Mostramos un mensaje para los casos en los que no recibamos caracteres numéricos.
                     System.out.println("Error: no se admiten caracteres no numéricos.\n");
                     sc.nextLine();
                     opcion = 0;
@@ -267,6 +281,8 @@ public class Cliente {
             // [! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ { | } ~]
             Pattern patronContra = Pattern.compile("^[A-Za-z0-9\\p{Punct}]{10,20}$");
 
+            // Probamos los datos con sus respectivos patrones, y en caso de no pasarlos, lanzamos una excepción con el
+            // mensaje oportuno para cada caso.
             if (!patronNombreApellido.matcher(cliente.getNombre()).matches()) {
                 throw new Exception("Nombre no valido. (Solo se admiten caracteres alfabeticos (20 máx))\n");
             }
@@ -302,24 +318,29 @@ public class Cliente {
 
     public static byte[] cifrar(ModeloCliente cliente, PublicKey clave) throws Exception {
 
+        // Creamos el objeto Cipher utilizando el algoritmo RSA.
         Cipher cipher = Cipher.getInstance("RSA");
+
+        // Inicializamos el objeto en modo cifrado usando la clave pública.
         cipher.init(Cipher.ENCRYPT_MODE, clave);
 
+        // Convertimos el objeto en bytes con la función específica para ello, y los almacenamos en la variable Datos.
         byte[] datos = objetoToBytes(cliente);
 
+        // Aplicamos el cifrado RSA y lo devolvemos.
         return cipher.doFinal(datos);
     }
 
     public static byte[] objetoToBytes(Object obj) throws Exception {
 
-        // Creamos un contenedor temporal para almaecanr los bytes mientra se construyen.
+        // Creamos un contenedor temporal para almacenar los bytes mientras se construyen.
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         // Creamos el objeto que sabe convertir el objeto cliente en bytes.
         ObjectOutputStream out = new ObjectOutputStream(bos);
 
-        // Sreializamos al cliente, convirtiendolo en una representacion binaria
-        // y escibiendolo en ByteArrayOutputStream.
+        // Serializamos al cliente, convirtiéndolo en una representación binaria
+        // y escribiéndolo en ByteArrayOutputStream.
         out.writeObject(obj);
 
         // Limpiamos el stream.
