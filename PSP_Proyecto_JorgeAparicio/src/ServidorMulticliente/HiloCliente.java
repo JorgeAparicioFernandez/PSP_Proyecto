@@ -71,19 +71,21 @@ public class HiloCliente extends Thread{
                         if (clienteRegistrado == null){
 
                             // Desciframos el objeto ModeloCliente proporcionado por el cliente.
-                            ModeloCliente cliente = descifrar(clienteCifrado, claves.getPrivate());
+                            ModeloCliente mc = descifrar(clienteCifrado, claves.getPrivate());
 
                             // Hasheamos la contraseña con su función específica.
-                            String contraHasheada = hashSHA256(cliente.getContra());
+                            String contraHasheada = hashSHA256(mc.getContra());
 
                             // Guardamos los datos del cliente registrado con la contraseña hasheada.
-                            clienteRegistrado = new ModeloCliente(cliente.getNombre(), cliente.getApellido(),
-                                    cliente.getEdad(), cliente.getEmail(), cliente.getUsuario(), contraHasheada);
+                            clienteRegistrado = new ModeloCliente(mc.getNombre(), mc.getApellido(),
+                                    mc.getEdad(), mc.getEmail(), mc.getUsuario(), contraHasheada);
 
                             // Mostramos un mensaje informativo.
                             String msg = "Registro de " + clienteRegistrado.getUsuario() + " completado con exito.\n";
 
-                            System.out.println(msg);
+                            System.out.println("Proceso de registro completado " +
+                                    "para la sesión de "
+                                    + cliente.getInetAddress().getHostAddress() + "\n");
 
                             salida.writeObject(msg);
 
@@ -131,10 +133,12 @@ public class HiloCliente extends Thread{
                                             "para la sesión de "
                                             + cliente.getInetAddress().getHostAddress() + "\n");
 
-                                    String msg = "Inicio de sesión completado con exito, bienvenido "
+                                    String msg = "Inicio de sesión completado con éxito, bienvenido "
                                             + mc.getUsuario() +"\n";
 
-                                    System.out.println(msg);
+                                    System.out.println("Proceso de inicio de sesión completado " +
+                                            "para la sesión de "
+                                            + cliente.getInetAddress().getHostAddress() + "\n");
 
                                     salida.writeObject(msg);
 
