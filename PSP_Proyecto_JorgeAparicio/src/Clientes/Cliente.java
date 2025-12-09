@@ -92,9 +92,9 @@ public class Cliente {
                                 usuario = sc.nextLine();
 
                                 System.out.println("Requisitos:\n"
-                                        + "Minimo de Caracteres -> 10\n"
-                                        + "Maximo de Caracteres -> 20\n"
-                                        + "Caracteres validos   -> Alfanumericos / Especiales comunes " +
+                                        + "Mínimo de Caracteres -> 10\n"
+                                        + "Máximo de Caracteres -> 20\n"
+                                        + "Caracteres validos   -> Alfanuméricos / Especiales comunes " +
                                         "[! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\\\ ] ^ _ { | } ~]\n");
                                 System.out.println("Introduzca su Contraseña:");
                                 contra = sc.nextLine();
@@ -164,14 +164,14 @@ public class Cliente {
                             break;
                         case 4:
 
-                            // Introducimos el nombre usuario.
+                            // Introducimos el identificador del billete que deseamos comprar.
                             System.out.println("Introduce el identificador del billete que deseas comprar:");
                             identificador = sc.nextInt();
                             sc.nextLine();
 
                             // Construimos el paquete para el envío.
                             envio = new HashMap<>();
-                            envio.put("accion", 4);
+                            envio.put("acción", 4);
                             envio.put("identificador", identificador);
 
                             // Enviamos el paquete.
@@ -205,12 +205,12 @@ public class Cliente {
                                     if (verificarRSA.verify(firma)){
                                         // La firma ha sido validada
                                         System.out.println("La Firma de la compra de su entrada " +
-                                                "ha sido verificada con exito. CodCompra: " + codCompra + "\n");
+                                                "ha sido verificada con éxito. CodCompra: " + codCompra + "\n");
                                     }else{
                                         // La firma no ha sido validada
                                         System.out.println("La Firma de la compra de su entrada " +
                                                 "no ha pasado la verificación pertinente, " +
-                                                "Porfavor contacte con ayuda al cliente. CodCompra: " + codCompra + "\n");
+                                                "Por favor contacte con ayuda al cliente. CodCompra: " + codCompra + "\n");
                                     }
 
                                     break;
@@ -284,15 +284,15 @@ public class Cliente {
             // Probamos los datos con sus respectivos patrones, y en caso de no pasarlos, lanzamos una excepción con el
             // mensaje oportuno para cada caso.
             if (!patronNombreApellido.matcher(cliente.getNombre()).matches()) {
-                throw new Exception("Nombre no valido. (Solo se admiten caracteres alfabeticos (20 máx))\n");
+                throw new Exception("Nombre no valido. (Solo se admiten caracteres alfabéticos (20 máx))\n");
             }
 
             if (!patronNombreApellido.matcher(cliente.getApellido()).matches()) {
-                throw new Exception("Apellido no valido. (Solo se admiten caracteres alfabeticos (20 máx))\n");
+                throw new Exception("Apellido no valido. (Solo se admiten caracteres alfabéticos (20 máx))\n");
             }
 
             if (!patronEdad.matcher(cliente.getEdad()).matches()) {
-                throw new Exception("Edad no valida. (Solo se admiten cararcteres númericos (máx 2))\n");
+                throw new Exception("Edad no valida. (Solo se admiten caracteres numéricos (máx 2))\n");
             }
 
             if (!patronEmail.matcher(cliente.getEmail()).matches()) {
@@ -300,7 +300,7 @@ public class Cliente {
             }
 
             if (!patronUsuario.matcher(cliente.getUsuario()).matches()) {
-                throw new Exception("Nombre de Usuario no valido. (Solo se admiten caracteres alfanumericos (15 máx))\n");
+                throw new Exception("Nombre de Usuario no valido. (Solo se admiten caracteres alfanuméricos (15 máx))\n");
             }
 
             if (!patronContra.matcher(cliente.getContra()).matches()) {
