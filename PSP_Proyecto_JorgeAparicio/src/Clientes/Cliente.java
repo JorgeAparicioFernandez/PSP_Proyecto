@@ -171,7 +171,7 @@ public class Cliente {
 
                             // Construimos el paquete para el envío.
                             envio = new HashMap<>();
-                            envio.put("acción", 4);
+                            envio.put("accion", 4);
                             envio.put("identificador", identificador);
 
                             // Enviamos el paquete.
